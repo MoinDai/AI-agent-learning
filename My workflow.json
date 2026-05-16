@@ -1,0 +1,168 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bc18d31c-2b88-4197-bd1b-550bc48acbfb",
+      "name": "When chat message received",
+      "webhookId": "46b69b3d-e9e9-4b41-9810-cee0f903b480"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an OCGT turbine data validation assistant for RWE Power AG.\n\nHere is the extracted content from two technical documents:\n\n{{ $input.all().map(item => item.json.text).join('\\n\\n---\\n\\n') }}\n\nPlease compare the data from both documents, identify any inconsistencies in parameters such as rated power, efficiency, emissions, and other technical specifications. Generate a structured validation report with severity levels.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "66307eb0-8aac-4db8-976f-3b3639e264b2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        208
+      ],
+      "id": "c2dd281c-cff5-412e-a8b8-496645a92b9f",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "hywigaDNETsDeom1",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        208
+      ],
+      "id": "61edc70d-9055-407d-b207-c926fc3de257",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\ocgt\\*.pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "263b7d10-54dd-497b-99fc-c244161ab879",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "e5675c16-6526-447e-ae3b-1b642d26f78f",
+      "name": "Extract from File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ba17f7df-3b6b-4402-bdc8-3fb861f7a882",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8733ee7d23a9b6b77c9ff18ac4078241f78814c072330cf1eae5acc06b5ac68a"
+  },
+  "id": "yENmqU7btbZULhfC",
+  "tags": []
+}
